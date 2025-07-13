@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credit Card Default Prediction</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <style>
+        /* Background styling */
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url("/static/bi.png"); 
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #f5f5f5;
+        }
+
+        .background-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(1deg, rgba(3, 3, 4, 0.1) 0%, rgba(4, 2, 0, 0.10) 100%);
+            z-index: -1;
+        }
+
+        /* Container styling */
+        .container {
+            background-color: rgba(44, 62, 80, 0.85);
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+            padding: 40px;
+            width: 90%;
+            max-width: 600px;
+            margin: 40px auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+        }
+
+        /* Title styling */
+        h1 {
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 2rem;
+            font-weight: 600;
+            font-size: 1.8rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Form group styling */
+        .form-group {
+            position: relative;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+
+        .floating-label {
+            position: relative;
+            padding-top: 20px;
+            width: 100%;
+        }
+
+        /* Input field styling */
+        .input-field {
+            width: 100%;
+            padding: 15px 15px 15px 40px;
+            font-size: 16px;
+            border: none;
+            border-bottom: 2px solid rgba(189, 195, 199, 0.3);
+            background-color: rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+            border-radius: 4px 4px 0 0;
+            color: #f5f5f5;
+            box-sizing: border-box;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-bottom-color: #3498db;
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .input-field:focus + label,
+        .input-field:not(:placeholder-shown) + label {
+            transform: translateY(-25px) scale(0.85);
+            color: #3498db;
+        }
+
+        /* Label styling */
+        .floating-label label {
+            position: absolute;
+            top: 25px;
+            left: 40px;
+            color: rgba(189, 195, 199, 0.8);
+            pointer-events: none;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+
+        /* Highlight bar */
+        .highlight {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 2px;
+            width: 0;
+            background-color: #3498db;
+            transition: all 0.3s ease;
+        }
+
+        /* Button styling */
+        .btn-predict {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 50px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 30px auto 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(41, 128, 185, 0.3);
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .btn-predict:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(41, 128, 185, 0.4);
+        }
+
+        .btn-predict:active {
+            transform: translateY(0);
+        }
+
+        .btn-text {
+            position: relative;
+            z-index: 2;
+            transition: all 0.3s ease;
+        }
+
+        .btn-icon {
+            position: relative;
+            z-index: 2;
+            margin-left: 10px;
+            transform: translateX(-10px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .btn-predict:hover .btn-text {
+            transform: translateX(-10px);
+        }
+
+        .btn-predict:hover .btn-icon {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .btn-predict::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #2980b9, #3498db);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1;
+        }
+
+        .btn-predict:hover::after {
+            opacity: 1;
+        }
+
+        /* Select dropdown styling */
+        select.input-field {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23bdc3c7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 15px;
+            padding-right: 30px;
+        }
+
+        /* Icon styling */
+        .field-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(189, 195, 199, 0.8);
+            font-size: 18px;
+            z-index: 2;
+        }
+
+        /* Currency symbol styling */
+.currency-symbol {
+    position: absolute;
+    left: 35px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(189, 195, 199, 0.8);
+    pointer-events: none;
+    font-weight: 500;
+    font-size: 0.75rem; /* smaller font size */
+}
+
+        
+
+        .currency-input {
+            padding-left: 60px !important;
+        }
+
+        /* Animation for form elements */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-animation .form-group {
+            animation: fadeInUp 0.6s forwards;
+            opacity: 0;
+        }
+
+        .form-animation .form-group:nth-child(1) { animation-delay: 0.1s; }
+        .form-animation .form-group:nth-child(2) { animation-delay: 0.2s; }
+        .form-animation .form-group:nth-child(3) { animation-delay: 0.3s; }
+        .form-animation .form-group:nth-child(4) { animation-delay: 0.4s; }
+        .form-animation .form-group:nth-child(5) { animation-delay: 0.5s; }
+        .form-animation .form-group:nth-child(6) { animation-delay: 0.6s; }
+        .form-animation .form-group:nth-child(7) { animation-delay: 0.7s; }
+    </style>
+</head>
+<body>
+    <div class="background-overlay"></div>
+    <div class="container">
+        <h1 class="title-animation"><i class="fas fa-credit-card"></i> Credit Card Default Risk Prediction</h1>
+        <form action="/predict" method="post" class="form-animation">
+            <div class="form-group floating-label">
+                <i class="fas fa-calendar-alt field-icon"></i>
+                <select id="PAY_0" name="PAY_0" required class="input-field">
+                    <option value=""></option>
+                    <option value="-2">No consumption</option>
+                    <option value="-1">Paid in full</option>
+                    <option value="0">Revolving credit</option>
+                    <option value="1">Payment delay for 1 month</option>
+                    <option value="2">Payment delay for 2 months</option>
+                    <option value="3">Payment delay for 3 months</option>
+                    <option value="4">Payment delay for 4 months</option>
+                    <option value="5">Payment delay for 5 months</option>
+                    <option value="6">Payment delay for 6 months</option>
+                    <option value="7">Payment delay for 7 months</option>
+                    <option value="8">Payment delay for 8 months</option>
+                </select>
+                <label for="PAY_0">Repayment Status (Previous Month)</label>
+                <span class="highlight"></span>
+            </div>
+            
+            <div class="form-group floating-label">
+                <i class="fas fa-user field-icon"></i>
+                <input type="text" id="AGE" name="AGE" required class="input-field" pattern="\d*" minlength="2" maxlength="3">
+                <label for="AGE">Age</label>
+                <span class="highlight"></span>
+            </div>
+
+            <div class="form-group floating-label">
+                <i class="fas fa-heart field-icon"></i>
+                <select id="MARRIAGE" name="MARRIAGE" required class="input-field">
+                    <option value=""></option>
+                    <option value="Single">Single</option>
+                    <option value="Married">Married</option>
+                    <option value="Other">Other (divorced, widowed)</option>
+                </select>
+                <label for="MARRIAGE">Marital Status</label>
+                <span class="highlight"></span>
+            </div>
+
+            <div class="form-group floating-label" style="position: relative;">
+                <i class="fas fa-wallet field-icon"></i>
+                <span class="currency-symbol">NT$</span>
+                <input type="text" id="LIMIT_BAL" name="LIMIT_BAL" required class="input-field currency-input">
+                <label for="LIMIT_BAL">Credit Limit</label>
+                <span class="highlight"></span>
+            </div>
+            
+            <div class="form-group floating-label" style="position: relative;">
+                <i class="fas fa-file-invoice-dollar field-icon"></i>
+                <span class="currency-symbol">NT$</span>
+                <input type="text" id="BILL_AMT1" name="BILL_AMT1" required class="input-field currency-input">
+                <label for="BILL_AMT1">Bill Amount (Month 1)</label>
+                <span class="highlight"></span>
+            </div>
+            
+            <div class="form-group floating-label" style="position: relative;">
+                <i class="fas fa-file-invoice-dollar field-icon"></i>
+                <span class="currency-symbol">NT$</span>
+                <input type="text" id="BILL_AMT2" name="BILL_AMT2" required class="input-field currency-input">
+                <label for="BILL_AMT2">Bill Amount (Month 2)</label>
+                <span class="highlight"></span>
+            </div>
+
+            <div class="form-group floating-label" style="position: relative;">
+                <i class="fas fa-file-invoice-dollar field-icon"></i>
+                <span class="currency-symbol">NT$</span>
+                <input type="text" id="BILL_AMT3" name="BILL_AMT3" required class="input-field currency-input">
+                <label for="BILL_AMT3">Bill Amount (Month 3)</label>
+                <span class="highlight"></span>
+            </div>
+            
+            <button type="submit" class="btn-predict">
+                <span class="btn-text">Predict Default Risk</span>
+                <span class="btn-icon"><i class="fas fa-arrow-right"></i></span>
+            </button>
+        </form>
+    </div>
+
+    <script>
+        // Animation for title
+        anime({
+            targets: '.title-animation',
+            translateY: [-30, 0],
+            opacity: [0, 1],
+            duration: 1000,
+            easing: 'easeOutExpo'
+        });
+
+        // Button hover effect
+        document.querySelector('.btn-predict').addEventListener('mouseenter', function() {
+            anime({
+                targets: this,
+                scale: 1.05,
+                duration: 200
+            });
+        });
+
+        document.querySelector('.btn-predict').addEventListener('mouseleave', function() {
+            anime({
+                targets: this,
+                scale: 1,
+                duration: 200
+            });
+        });
+
+        // Input field focus effects
+        document.querySelectorAll('.input-field').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentNode.querySelector('.highlight').style.width = '100%';
+            });
+            
+            input.addEventListener('blur', function() {
+                if (!this.value) {
+                    this.parentNode.querySelector('.highlight').style.width = '0%';
+                }
+            });
+        });
+
+        // Format currency inputs with commas and NTD symbol
+        const currencyInputs = document.querySelectorAll('.currency-input');
+        
+        currencyInputs.forEach(input => {
+            input.addEventListener('input', function(e) {
+                // Remove all non-digit characters
+                let value = this.value.replace(/[^\d]/g, '');
+                
+                // Format with commas
+                if (value.length > 0) {
+                    value = parseInt(value, 10).toLocaleString('en-US');
+                }
+                
+                this.value = value;
+            });
+            
+            // Ensure the value is properly formatted when leaving the field
+            input.addEventListener('blur', function() {
+                if (this.value) {
+                    let value = this.value.replace(/[^\d]/g, '');
+                    if (value.length > 0) {
+                        this.value = parseInt(value, 10).toLocaleString('en-US');
+                    }
+                }
+            });
+            
+            // Remove commas when focusing for easier editing
+            input.addEventListener('focus', function() {
+                if (this.value) {
+                    this.value = this.value.replace(/[^\d]/g, '');
+                }
+            });
+        });
+
+        // Age input validation
+        const ageInput = document.getElementById('AGE');
+        ageInput.addEventListener('input', function(e) {
+            // Only allow numbers
+            this.value = this.value.replace(/[^\d]/g, '');
+            
+            
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction Result</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* Background styling */
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url("/static/bi.png"); 
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #f5f5f5;
+        }
+
+        .background-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(1deg, rgba(3, 3, 4, 0.1) 0%, rgba(4, 2, 0, 0.10) 100%);
+            z-index: -1;
+        }
+
+        /* Container styling */
+        .container {
+            background-color: rgba(44, 62, 80, 0.9);
+            border-radius: 16px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            width: 90%;
+            max-width: 600px;
+            margin: 40px auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            animation: fadeInUp 0.8s forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Title styling */
+        h1 {
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 2rem;
+            font-weight: 600;
+            font-size: 1.8rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        h2, h3 {
+            color: #f0f0f0;
+        }
+
+        /* Result card styling */
+        .result-card {
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+            transition: all 0.3s ease;
+        }
+
+        .high-risk {
+            background: linear-gradient(135deg, #ff4d4d, #cc0000);
+            border: 1px solid #ff6666;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+        }
+
+        .low-risk {
+            background: linear-gradient(135deg, #4dff4d, #00cc00);
+            border: 1px solid #66ff66;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+        }
+
+        .result-card h2 {
+            font-size: 2rem;
+            margin: 0 0 10px 0;
+        }
+
+        .result-card p {
+            font-size: 1.2rem;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        /* Input summary styling */
+        .input-summary {
+            background-color: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .input-summary h3 {
+            margin-top: 0;
+            color: #5d8bf4;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 10px;
+        }
+
+        .input-summary ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .input-summary li {
+            padding: 8px 0;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+        }
+
+        .input-summary li:last-child {
+            border-bottom: none;
+        }
+
+        .input-summary strong {
+            color: #5d8bf4;
+            font-weight: 500;
+        }
+
+        /* Back button styling */
+        .back-button {
+            display: block;
+            text-align: center;
+            background: linear-gradient(135deg, #5d8bf4, #3a7bd5);
+            color: white;
+            text-decoration: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 0 auto;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            width: fit-content;
+            border: none;
+        }
+
+        .back-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(93, 139, 244, 0.5);
+        }
+
+        .back-button:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="background-overlay"></div>
+    <div class="container">
+        <h1>Prediction Result</h1>
+        
+        <div class="result-card {{ 'high-risk' if result == 'High Risk' else 'low-risk' }}">
+            <h2>{{ result }}</h2>
+            <p>Probability of default: {{ probability }}%</p>
+        </div>
+        
+        <div class="input-summary">
+            <h3>Input Summary:</h3>
+            <ul>
+                <li><strong>Repayment Status (Previous Month):</strong> {{ input_data.PAY_0 }}</li>
+                <li><strong>Age:</strong> {{ input_data.AGE }}</li>
+                <li><strong>Marital Status:</strong> {{ input_data.MARRIAGE }}</li>
+                <li><strong>Credit Limit:</strong> NT${{ "{:,.2f}".format(input_data.LIMIT_BAL) }}</li>
+                <li><strong>Bill Amount (Month 1):</strong> NT${{ "{:,.2f}".format(input_data.BILL_AMT1) }}</li>
+                <li><strong>Bill Amount (Month 2):</strong> NT${{ "{:,.2f}".format(input_data.BILL_AMT2) }}</li>
+                <li><strong>Bill Amount (Month 3):</strong> NT${{ "{:,.2f}".format(input_data.BILL_AMT3) }}</li>
+            </ul>
+        </div>
+        
+        <a href="/" class="back-button">Make Another Prediction</a>
+    </div>
+</body>
+</html>
